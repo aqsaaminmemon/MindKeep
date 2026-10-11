@@ -1,0 +1,502 @@
+/* Permanent Peach design with Light and Dark appearance. */
+:root[data-design="peach"],
+:root[data-design="peach"] body {
+  --bg: #fff8f1;
+  --surface: #fffdf9;
+  --sidebar: #fae8de;
+  --text: #3c302c;
+  --muted: #796f69;
+  --accent: #b64730;
+  --button-blue: #b64730;
+  --button-ink: #b64730;
+  --selected: #f8ddd2;
+  --border: #efd5c7;
+  --violet: #c15c43;
+  --shadow: 0 8px 30px #9c60400c;
+  --peach-search: #f7f0e6;
+  --peach-story: #fae1d3;
+  --peach-card-yellow: #fff0c5;
+  --peach-card-rose: #f8d8cb;
+  --peach-card-sage: #dae8d2;
+  --peach-card-text: #74665c;
+  --peach-scrollbar: #c78f75;
+  scrollbar-color: var(--peach-scrollbar) var(--bg);
+}
+:root[data-design="peach"].theme-dark,
+:root[data-design="peach"] body.theme-dark {
+  --bg: #241f1c;
+  --surface: #302823;
+  --sidebar: #342821;
+  --text: #f7eee5;
+  --muted: #d0bbae;
+  --accent: #f4ad93;
+  --button-blue: #b64730;
+  --button-ink: #f4ad93;
+  --selected: #51362c;
+  --border: #62473a;
+  --violet: #f4ad93;
+  --shadow: 0 8px 30px #00000020;
+  --peach-search: #3b3028;
+  --peach-story: #3b2b24;
+  --peach-card-yellow: #4c3f26;
+  --peach-card-rose: #4d332b;
+  --peach-card-sage: #344130;
+  --peach-card-text: #e1ccbe;
+  --peach-scrollbar: #b78066;
+}
+:root[data-design="peach"] .topbar {
+  background: var(--surface);
+  border-bottom-color: transparent;
+}
+:root[data-design="peach"] .brand {
+  color: var(--text);
+}
+:root[data-design="peach"] .search-bar {
+  background: var(--peach-search);
+  min-width: 0;
+  max-width: none;
+  border-color: color-mix(in srgb, var(--border) 65%, transparent);
+  border-radius: 16px;
+}
+:root[data-design="peach"] .search-bar:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+:root[data-design="peach"] .search-bar kbd {
+  background: var(--surface);
+}
+:root[data-design="peach"] #sidebar-toggle,
+:root[data-design="peach"] #view-mode {
+  background: var(--selected);
+  color: var(--button-ink);
+  border-radius: 14px;
+}
+:root[data-design="peach"] #settings {
+  color: var(--accent);
+}
+:root[data-design="peach"] .avatar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+:root[data-design="peach"] .sidebar {
+  top: 104px;
+  bottom: 26px;
+  left: 24px;
+  width: 216px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px 14px 20px;
+  box-shadow: 0 12px 30px #9c604009;
+  scrollbar-width: thin;
+  scrollbar-color: var(--peach-scrollbar) transparent;
+}
+:root[data-design="peach"] .nav-item {
+  border-radius: 14px;
+  padding: 12px 13px;
+  margin-bottom: 8px;
+}
+:root[data-design="peach"] .nav-item.active,
+:root[data-design="peach"] .nav-item:hover {
+  background: var(--surface);
+}
+:root[data-design="peach"] .nav-item.active .nav-count {
+  background: var(--bg);
+}
+:root[data-design="peach"] .main-content {
+  margin-left: 264px;
+  padding: 42px 48px;
+}
+:root[data-design="peach"] .sidebar-hidden .main-content {
+  margin-left: 0;
+}
+:root[data-design="peach"] #greeting {
+  color: var(--accent);
+}
+:root[data-design="peach"] #greeting::before {
+  content: "✧ ";
+}
+:root[data-design="peach"] .page-heading h1 {
+  color: var(--text);
+  font-size: 36px;
+}
+:root[data-design="peach"] .composer {
+  border-color: transparent;
+  border-radius: 22px;
+  min-height: 78px;
+  box-shadow: 0 10px 28px #9c60400a;
+  padding-left: 20px;
+}
+:root[data-design="peach"] #create-note {
+  background: #e76f51;
+  color: #fff;
+  width: 46px;
+  height: 46px;
+  padding: 11px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px #b6473020;
+}
+:root[data-design="peach"] .composer-input:hover {
+  background: transparent;
+}
+:root[data-design="peach"] .note-card[data-color] {
+  border-color: transparent;
+  border-radius: 22px 22px 22px 9px;
+  background: var(--peach-card-yellow);
+  padding: 20px 20px 14px;
+  box-shadow: 0 8px 22px #9c604009;
+}
+:root[data-design="peach"] .note-card[data-tone="1"] {
+  background: var(--peach-card-rose);
+}
+:root[data-design="peach"] .note-card[data-tone="2"] {
+  background: var(--peach-card-sage);
+}
+:root[data-design="peach"] .note-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 8px 24px #9c604016;
+}
+:root[data-design="peach"] .card-title {
+  color: var(--text);
+  font-size: 17px;
+}
+:root[data-design="peach"] .card-text,
+:root[data-design="peach"] .card-time,
+:root[data-design="peach"] .card-checklist {
+  color: var(--peach-card-text);
+}
+:root[data-design="peach"] .card-footer {
+  border-top-color: transparent;
+  margin-top: 22px;
+}
+:root[data-design="peach"] .card-actions .icon-button {
+  color: var(--accent);
+}
+:root[data-design="peach"] .note-card.note-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+:root[data-design="peach"] .primary:hover {
+  background: #a63e28;
+  box-shadow: 0 4px 12px #b6473025;
+}
+:root[data-design="peach"] .secondary {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--button-ink);
+}
+:root[data-design="peach"] .secondary:hover {
+  background: var(--selected);
+}
+:root[data-design="peach"] mark,
+:root[data-design="peach"] ::highlight(search-match) {
+  background: #ffe19d;
+  color: #4b3525;
+}
+:root[data-design="peach"] .auth-story {
+  background: var(--peach-story);
+  color: var(--text);
+}
+:root[data-design="peach"] .auth-story .brand,
+:root[data-design="peach"] .story-copy h1 {
+  color: var(--text);
+}
+:root[data-design="peach"] .story-copy p,
+:root[data-design="peach"] .story-footer {
+  color: var(--muted);
+}
+:root[data-design="peach"] .story-copy h1 em,
+:root[data-design="peach"] .story-copy .eyebrow {
+  color: var(--accent);
+}
+:root[data-design="peach"] .mini-note {
+  background: var(--peach-card-yellow);
+  border-color: var(--border);
+  color: var(--text);
+}
+:root[data-design="peach"] .mini-note.second {
+  background: var(--peach-card-rose);
+}
+:root[data-design="peach"] .mini-note.third {
+  background: var(--peach-card-sage);
+}
+:root[data-design="peach"] .mini-note span {
+  color: var(--peach-card-text);
+}
+:root[data-design="peach"] .auth-card input {
+  background: var(--peach-search);
+}
+@media (min-width: 1200px) {
+  :root[data-design="peach"] .notes-grid.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1800px) {
+  :root[data-design="peach"] .notes-grid.grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1100px) and (min-width: 851px) {
+  :root[data-design="peach"] .sidebar {
+    left: 16px;
+    width: 196px;
+  }
+  :root[data-design="peach"] .main-content {
+    margin-left: 228px;
+    padding: 38px 28px;
+  }
+  :root[data-design="peach"] .sidebar-hidden .main-content {
+    margin-left: 0;
+  }
+}
+@media (max-width: 850px) {
+  :root[data-design="peach"] .sidebar {
+    top: 96px;
+    bottom: 16px;
+    left: 0;
+    width: 250px;
+  }
+  :root[data-design="peach"] .main-content {
+    margin-left: 0;
+    padding: 32px 24px;
+  }
+}
+@media (max-width: 620px) {
+  :root[data-design="peach"] .sidebar {
+    top: 80px;
+  }
+  :root[data-design="peach"] .main-content {
+    padding: 28px 16px;
+  }
+  :root[data-design="peach"] .page-heading h1 {
+    font-size: 30px;
+  }
+  :root[data-design="peach"] .search-bar {
+    border-radius: 12px;
+  }
+}
+
+:root[data-design="peach"] .top-actions {
+  flex-shrink: 0;
+}
+
+/* A slightly larger welcome form without widening the mobile page. */
+:root[data-design="peach"] .auth-card {
+  max-width: 390px;
+}
+:root[data-design="peach"] .small-logo img {
+  width: 80px;
+  height: 80px;
+}
+:root[data-design="peach"] .auth-card h2 {
+  font-size: 38px;
+}
+:root[data-design="peach"] .auth-card > p {
+  font-size: 14px;
+}
+:root[data-design="peach"] .auth-card label {
+  font-size: 13px;
+}
+:root[data-design="peach"] .auth-card input {
+  padding: 16px;
+  font-size: 15px;
+}
+:root[data-design="peach"] .auth-card input::placeholder {
+  font-size: 14px;
+}
+:root[data-design="peach"] .auth-card .primary {
+  padding: 17px;
+  font-size: 15px;
+}
+:root[data-design="peach"] .auth-card .text-button {
+  font-size: 13px;
+}
+@media (max-width: 620px) {
+  :root[data-design="peach"] .auth-card h2 {
+    font-size: 34px;
+  }
+}
+
+/* Saved choices take precedence over the default pastel card colors. */
+:root[data-design="peach"] .note-card[data-color="mint"] {
+  background: var(--peach-card-sage);
+}
+:root[data-design="peach"] .note-card[data-color="peach"] {
+  background: var(--peach-card-rose);
+}
+.note-background {
+  border: 0;
+  border-top: 1px solid var(--border);
+  padding: 18px 0 0;
+  margin: 18px 0 0;
+}
+.note-background legend {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 0 8px 0 0;
+}
+.note-background-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.note-background-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 13px;
+}
+.note-background-choice:hover {
+  background: var(--selected);
+}
+.note-background-choice[aria-pressed="true"] {
+  border-color: var(--button-ink);
+  box-shadow: inset 0 0 0 1px var(--button-ink);
+}
+.note-background-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #00000015;
+}
+.note-background-green {
+  background: var(--peach-card-sage, #edf7f2);
+}
+.note-background-peach {
+  background: var(--peach-card-rose, #fff3ed);
+}
+
+:root[data-design="peach"] .mini-note::before {
+  background: #df9d7e66;
+  border-color: #d98f6e66;
+}
+@media (min-width: 851px) {
+  :root[data-design="peach"] .auth-screen {
+    grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
+  }
+}
+
+:root[data-design="peach"] .note-card[data-color="yellow"] {
+  background: var(--peach-card-yellow);
+}
+.note-background-yellow {
+  background: var(--peach-card-yellow, #fff9e8);
+}
+
+/* Clearer writing controls on the neutral editor surface. */
+:root[data-design="peach"] .format-toolbar {
+  gap: 6px;
+  padding: 10px;
+  margin: 8px 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--selected) 45%, var(--surface));
+}
+:root[data-design="peach"] .format-toolbar button,
+:root[data-design="peach"] .format-toolbar select,
+:root[data-design="peach"] .format-toolbar .color-tool {
+  min-width: 36px;
+  height: 36px;
+  padding: 6px 9px;
+  font-size: 14px;
+  color: var(--text);
+  border-radius: 8px;
+}
+:root[data-design="peach"] .format-toolbar button {
+  font-weight: 600;
+  color: var(--button-ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+:root[data-design="peach"] .format-toolbar select {
+  max-width: 130px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+:root[data-design="peach"] .format-toolbar .history-tools button {
+  font-size: 24px;
+}
+:root[data-design="peach"] .note-content {
+  color: var(--text);
+  line-height: 1.8;
+  caret-color: var(--accent);
+}
+:root[data-design="peach"] .note-content:empty::before,
+:root[data-design="peach"] .note-title::placeholder {
+  color: var(--muted);
+  opacity: 0.9;
+}
+@media (min-width: 851px) {
+  :root[data-design="peach"] .editor-dialog {
+    width: min(860px, calc(100% - 40px));
+  }
+}
+:root[data-design="peach"] .format-toolbar .history-tools {
+  margin-left: 8px;
+}
+
+/* Keep all formatting actions, including Undo/Redo, on one row. */
+:root[data-design="peach"] .format-toolbar {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+:root[data-design="peach"] .format-toolbar > * {
+  flex-shrink: 0;
+}
+:root[data-design="peach"] .format-toolbar .history-tools {
+  margin-left: auto;
+}
+
+:root[data-design="peach"] .format-toolbar .color-tool {
+  color: var(--button-ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent);
+}
+:root[data-design="peach"] .format-toolbar button:hover:not(:disabled) {
+  background: var(--selected);
+  border-color: var(--accent);
+}
+:root[data-design="peach"] .format-toolbar button:disabled {
+  opacity: 0.55;
+}
+:root[data-design="peach"] .format-toolbar .tool-divider {
+  background: var(--border);
+  height: 24px;
+  margin: 0 3px;
+}
+
+/* Make the saved appearance distinct from keyboard focus and hover. */
+:root[data-design="peach"] [data-theme] {
+  border: 3px solid transparent;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+:root[data-design="peach"] [data-theme][aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--selected);
+  box-shadow: none;
+}
+
+/* Scroll dialog contents inside the rounded frame. */
+:root[data-design="peach"] .utility-dialog {
+  overflow: hidden;
+}
+:root[data-design="peach"] .utility-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+:root[data-design="peach"] .utility-dialog .dialog-heading {
+  flex-shrink: 0;
+}
+:root[data-design="peach"] #utility-body {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  padding-right: 8px;
+}

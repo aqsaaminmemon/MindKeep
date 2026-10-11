@@ -1,0 +1,20 @@
+{
+  "configurations": [
+    {
+      "name": "Linux",
+      "compilerPath": "/usr/bin/c++",
+      "cppStandard": "c++20",
+      "cStandard": "c17",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "includePath": [
+        "${workspaceFolder}/backend/include",
+        "${workspaceFolder}/vendor",
+        "${workspaceFolder}/data/build-deps/usr/include",
+        "${workspaceFolder}/data/build-deps/usr/include/x86_64-linux-gnu",
+        "${workspaceFolder}/data/build-deps/usr/include/mysql"
+      ]
+    }
+  ],
+  "version": 4
+}

@@ -1,0 +1,844 @@
+Build a full-stack notes application named MindKeep.
+
+Treat this specification as the agreed product scope. Implement the selected features faithfully and keep the interface focused on quick note capture.
+
+1. PRODUCT PURPOSE
+
+MindKeep helps everyday users write something down before they forget it.
+
+Typical uses include:
+- Saving a sudden idea.
+- Recording a shopping list.
+- Remembering an errand.
+- Keeping an important personal detail.
+- Recording a quick voice note.
+- Setting a reminder to revisit something.
+
+The central experience is:
+Open the app → capture a note → save automatically → find it again when needed.
+
+MindKeep should feel simple, calm, welcoming, and fast.
+
+It is an everyday notes application. Do not introduce study tools, flashcards, AI assistants, project-management dashboards, databases of custom properties, or complex workspace systems.
+
+Google Keep is the reference for the general interface structure and familiar note interactions. Use MindKeep’s own branding, colors, styling, and selected features.
+
+The approved design direction is “Airy Cards,” with a slightly stronger blue influence.
+
+2. TECHNOLOGY AND ARCHITECTURE
+
+Use:
+- C++ for the backend and the search engine.
+- HTML, CSS, and JavaScript for the frontend.
+- MySQL for persistent structured data.
+- CMake for the C++ build.
+
+Prefer C++20 where supported by the development environment.
+
+A suitable C++ web framework and supporting libraries may be used. Choose dependencies based on maintainability and compatibility, and explain the choices in the documentation.
+
+The frontend may use a suitable JavaScript framework, but keep the architecture understandable and avoid unnecessary complexity.
+
+A rich-text editor library is allowed. Configure it to provide only the selected editing capabilities.
+
+All authoritative backend operations must run through the C++ backend, including:
+- Authentication and authorization.
+- Note persistence.
+- Search and search filtering.
+- Folder and tag management.
+- Attachment ownership and access.
+- Sharing permissions.
+- Synchronization.
+- Reminder scheduling.
+
+Do not substitute another backend language for C++.
+
+MySQL is the persistent source of truth. The custom C++ search index is a derived structure that can be rebuilt from stored notes.
+
+Images and audio may use file storage, with their ownership, storage references, and metadata stored in MySQL.
+
+3. EXACT FEATURE SCOPE
+
+Preserve these original feature numbers in the implementation checklist.
+
+There are 45 active selected features and one selected feature that has been postponed.
+
+WRITING AND EDITING
+
+1. Create notes.
+   Provide a title field and an editable content area.
+
+2. Edit notes.
+   Existing notes must reopen with their content and formatting intact.
+
+3. Autosave.
+   Save changes automatically while the user writes.
+   Display truthful saving and synchronization states.
+
+5. Rich text formatting.
+   Support bold, italics, underline, and strikethrough.
+
+6. Headings.
+   Support appropriate heading levels inside notes.
+
+7. Text colors and highlights.
+   Allow users to color text and highlight passages.
+
+8. Font controls.
+   Allow a manageable selection of font families and sizes.
+
+9. Bulleted and numbered lists.
+
+10. Checklists.
+    Support interactive checkboxes and preserve their completion state.
+
+18. Undo and redo.
+    Cover meaningful editor changes, including formatting.
+
+20. Word and character counts.
+    Update counts as the note changes.
+    Define how words and characters are counted.
+
+21. Spell-check suggestions.
+    Browser-native spell-check is acceptable.
+
+22. Distraction-free writing.
+    Provide a focused editor that hides surrounding navigation.
+
+ORGANIZATION AND NAVIGATION
+
+26. Folders.
+    Folders are optional and single-level.
+    Notes can exist without a folder.
+    Moving a note into a folder must not require recreating it.
+
+27. Nested folders.
+    POSTPONED.
+    Do not implement nested folders in this version.
+
+28. Tags.
+    Tags are optional.
+    A note may have multiple tags or no tags.
+    Do not require tags when creating or saving a note.
+
+30. Pinned notes.
+    Display pinned notes above other notes in All Notes.
+
+31. Favorites.
+    Provide a separate Favorites view.
+    Favorites and pins are independent states.
+
+32. Archive.
+    Allow notes to be archived and restored to the active collection.
+
+33. Trash and recovery.
+    Move deleted notes into Trash.
+    Support restoration and explicit permanent deletion.
+
+34. Duplicate notes.
+    Create an independent copy of a note and its selected content.
+    Define attachment handling consistently.
+
+35. Sorting.
+    Support sorting by title, creation time, and last modification time.
+
+36. View modes.
+    Support grid, list, and compact views.
+
+37. Recent notes.
+    Provide access to recently opened notes.
+    Opening a note must not change its content modification timestamp.
+
+SEARCH
+
+46. Title search using C++ data structures.
+
+47. Full-content search using a custom C++ search engine.
+    This is the main technical component of the project.
+
+48. Search filters.
+    Support appropriate filters for folders, tags, dates, and note states.
+    Attachment-type filtering may be included within this selected feature.
+
+49. Highlight matching text.
+    Show matches in search results and in an opened note where appropriate.
+
+50. Saved searches.
+    Save and reuse a search query together with its filters.
+
+51. Advanced search syntax.
+    Support quoted phrases and documented conditions such as:
+    tag:
+    folder:
+    before:
+    after:
+
+REMINDERS AND MEDIA
+
+56. Note reminders.
+    Attach a date and time to a note.
+    Allow reminders to be edited or removed.
+
+69. Images.
+    Insert images into notes.
+    Preserve images when reopening, synchronizing, and backing up notes.
+
+73. Audio notes.
+    Record, save, and play audio.
+    Request microphone permission when needed.
+    Transcription is outside scope.
+
+ACCOUNTS AND PRIVACY
+
+79. User accounts.
+    Provide registration, login, logout, and separate private note libraries.
+
+80. Password reset.
+    Provide a working reset flow using time-limited, single-use tokens.
+
+82. App lock.
+    Support manual locking and locking after configurable inactivity.
+    Require verification before returning to private content.
+
+83. Locked notes.
+    Allow individual notes to require additional verification before opening.
+
+85. Read-only sharing links.
+    Share only explicitly selected notes.
+    Shared visitors can view permitted content but cannot edit it.
+    Allow the owner to revoke a sharing link.
+
+INTERFACE
+
+91. Themes.
+    Provide light mode, dark mode, and custom theme controls.
+    The default light theme must follow the approved MindKeep design.
+
+92. Responsive design.
+    Support desktop, tablet, and phone layouts.
+
+93. Keyboard shortcuts.
+    Provide accessible shortcuts for common actions and document them.
+
+AVAILABILITY AND DATA MANAGEMENT
+
+95. Offline creation and editing.
+
+96. Synchronization across devices.
+
+98. Export notes.
+    Support plain text, Markdown, HTML, and PDF.
+
+99. Backup and restore.
+    Support a complete user-library backup and a validated restore flow.
+
+Do not add features from earlier suggestions unless they appear in this selected scope.
+
+4. APPROVED VISUAL DESIGN
+
+Use the approved Airy Cards layout.
+
+DEFAULT LIGHT PALETTE
+
+- Main background: #F3F6FD
+- Card, header, and editor surfaces: #FFFFFF
+- Main text and headings: #172744
+- Secondary text: #60718D
+- Primary blue-indigo accent: #5265C7
+- Pale blue selected surfaces: #E8EDFC
+- Borders and separators: #DFE6F3
+- Sidebar surface: #F9FBFF
+- Supporting violet accent: #7550D0
+
+Use the blue-indigo accent for:
+- Primary action buttons.
+- Selected navigation text.
+- Pins and interactive states.
+- Keyboard focus.
+- Appropriate search highlights.
+
+Use violet sparingly, such as in the logo and selected favorite accents.
+
+Keep the design predominantly white and pale blue, with navy text.
+
+Use:
+- Rounded note cards, approximately 16px corners.
+- Subtle borders.
+- Restrained shadows.
+- Comfortable spacing, approximately 16px between cards.
+- Clear, readable typography.
+- Familiar icons with accessible labels.
+
+Avoid excessive gradients, heavy shadows, decorative dashboards, and unnecessary animation.
+
+Dark mode should preserve the same visual hierarchy with deep navy surfaces, readable light text, and lighter blue/violet accents.
+
+Custom theme controls must preserve readable text and visible focus states.
+
+5. DESKTOP INTERFACE
+
+TOP BAR
+
+Include:
+- MindKeep logo and app name.
+- Sidebar toggle.
+- Prominent search field with the placeholder “Search your notes…”.
+- View controls.
+- Settings access.
+- Account access.
+
+Search must remain prominent because retrieval is a central part of the product and the search engine is the main technical contribution.
+
+SIDEBAR
+
+Provide:
+- All Notes.
+- Reminders.
+- Favorites.
+- Recent.
+- Archive.
+- Trash.
+- Optional folders.
+- Optional tags.
+
+Keep organization secondary to note capture.
+
+Do not show nested directory trees.
+
+MAIN NOTE-ENTRY AREA
+
+Place a quick-entry composer above the note collection.
+
+The placeholder must be:
+“Create note…”
+
+The primary action label must be:
+“Create note”
+
+Do not use:
+“What do you want to remember?”
+
+Provide compact access to:
+- Checklist creation.
+- Image insertion.
+- Audio recording.
+
+The Create note action creates or opens a note for writing. Subsequent changes save automatically.
+
+Do not require the user to choose a folder or tag.
+
+Ensure the composer does not create duplicate notes when actions are repeated or network requests are retried.
+
+NOTE COLLECTION
+
+Use a responsive grid of cards by default.
+
+Show:
+- Pinned notes first.
+- Other active notes below.
+
+Cards should contain appropriate previews:
+- Title and text.
+- Checklist items.
+- Image previews.
+- An audio playback control.
+- Reminder information.
+- Optional tags.
+- Relevant timestamps.
+
+Keep card previews readable and reasonably short.
+
+Provide access to selected note actions without crowding every card. Less frequent actions can appear in a menu.
+
+NOTE EDITOR
+
+Open a selected note in an expanded editor over the note collection on desktop.
+
+Include:
+- Editable title.
+- Rich-text content.
+- Compact formatting tools.
+- Word and character counts.
+- Save status.
+- Access to reminders, images, audio, locks, and the selected note actions.
+
+The editor should feel like an enlarged note.
+
+A Done or Close action may dismiss the editor, but saving must not depend on clicking it.
+
+Preserve the current draft if the editor closes or navigation occurs during saving.
+
+6. MOBILE AND ACCESSIBILITY
+
+On smaller screens:
+- Replace the persistent sidebar with a navigation drawer.
+- Keep search easy to access.
+- Reduce the number of card columns naturally.
+- Open the note editor full screen.
+- Let toolbars wrap or move less frequent actions into menus.
+- Keep microphone, image, and checklist actions accessible.
+
+Support widths down to approximately 320px without horizontal clipping.
+
+Provide:
+- Keyboard navigation.
+- Visible focus.
+- Accessible names for icon actions.
+- Sufficient contrast.
+- Comfortable touch targets.
+- Clear form labels.
+- Screen-reader announcements for meaningful save and error states.
+
+Do not make important actions depend exclusively on hover.
+
+Keyboard shortcuts must not trigger destructive actions while the user is typing in the editor.
+
+7. C++ SEARCH ENGINE
+
+Build the primary search engine yourself using appropriate C++ data structures.
+
+Do not use:
+- MySQL full-text search as the main search engine.
+- Elasticsearch.
+- A hosted search service.
+- A library that replaces the project’s indexing and retrieval algorithms.
+
+Supporting libraries for Unicode processing, parsing, and other low-level concerns are allowed.
+
+REQUIRED STRUCTURES
+
+Use and justify an appropriate combination of:
+
+- Hash maps for term dictionaries and direct lookups.
+- An inverted index mapping terms to matching note IDs.
+- Posting lists containing term frequencies and token positions.
+- A trie or another justified structure for title-prefix search.
+- Appropriate structures for folder, tag, and date filtering.
+- Set operations for combining matching note IDs.
+
+Keep title and body information separate so ranking can treat them differently.
+
+TEXT PROCESSING
+
+Implement:
+- Extraction of searchable text from rich-text content.
+- Consistent tokenization.
+- Case normalization.
+- Defined punctuation handling.
+- Correct treatment of UTF-8 input.
+- Stable token positions for phrase matching.
+
+If stop words are removed for ranking, preserve the information needed for accurate phrase matching.
+
+Do not index raw HTML markup as visible note content.
+
+SEARCH BEHAVIOR
+
+Support:
+- Title search.
+- Full-content search.
+- Title-prefix matching.
+- Exact quoted phrases using token positions.
+- Selected filters.
+- Saved searches.
+- Useful result snippets.
+- Highlighted matches.
+
+Define and document how ordinary multiword searches are interpreted.
+
+Parse advanced search syntax deliberately. Handle invalid syntax with a clear message rather than silently changing its meaning.
+
+Support quoted values where appropriate, for example:
+tag:“Personal Ideas”
+
+Define whether before: and after: apply to creation or modification dates, and show that meaning in the interface and documentation.
+
+RANKING
+
+Use a documented ranking method.
+
+At minimum:
+- Give title matches greater weight than body matches.
+- Account for term relevance or frequency.
+- Use a deterministic tie-breaker.
+- Explain the scoring approach in the project report.
+
+INDEX LIFECYCLE
+
+Update the index after:
+- Note creation.
+- Content or title edits.
+- Deletion and permanent deletion.
+- Restoration.
+- Changes that affect filters.
+
+Manage database persistence and index updates in a controlled lifecycle.
+
+Rebuild the index after a server restart.
+
+Use concurrency controls so searches cannot read corrupted index structures during updates.
+
+USER ISOLATION
+
+Scope every private search to the authenticated user.
+
+Do not expose another user’s:
+- Titles.
+- Content.
+- Tags.
+- Attachments.
+- Search snippets.
+- Result counts that reveal private data.
+
+Locked-note titles, content, and snippets must follow the chosen privacy policy. Do not expose protected content without the required unlock.
+
+Archived and trashed notes must have predictable search behavior. Default searches should exclude Trash.
+
+DOCUMENTATION AND EVALUATION
+
+Document:
+- Data structures.
+- Index construction.
+- Query processing.
+- Phrase matching.
+- Filtering.
+- Ranking.
+- Index updates.
+- Time and space complexity.
+- Memory and concurrency considerations.
+
+Provide meaningful tests for:
+- Tokenization.
+- Phrase matching.
+- Ranking.
+- Filtering.
+- Updates and deletions.
+- Rebuilding the index.
+- User isolation.
+- Locked-note visibility.
+
+Include reproducible performance measurements on generated datasets of increasing size.
+
+Measure indexing time, search latency, and approximate index memory use. Report observed results honestly.
+
+8. AUTOSAVE AND OFFLINE BEHAVIOR
+
+AUTOSAVE
+
+Use a short debounce suitable for typing, such as approximately 500–1000ms.
+
+Preserve local drafts immediately enough to protect against accidental navigation.
+
+Display distinct states:
+- Saving.
+- Saved.
+- Saved on this device.
+- Waiting to sync.
+- Unable to save.
+
+Do not display “Saved” as confirmation of server persistence before the server acknowledges it.
+
+Retry recoverable failures without creating duplicate notes.
+
+OFFLINE SUPPORT
+
+Use appropriate browser storage for offline notes and pending operations.
+
+Cache the application resources needed for the offline writing experience.
+
+Allow users with an established local account session to create and edit notes offline.
+
+Clearly identify actions that require a connection.
+
+Do not persist session secrets unnecessarily or allow offline storage to bypass note locks.
+
+Protect locally stored private content according to the lock design and document the security boundaries.
+
+SYNCHRONIZATION
+
+Use stable IDs and revision information.
+
+Support:
+- Uploading pending local changes.
+- Receiving changes made on another device.
+- Synchronizing deletion and restoration.
+- Synchronizing relevant attachment metadata and uploads.
+- Retrying safely.
+
+Detect concurrent edits.
+
+Preserve both versions when a conflict cannot be merged safely. Give the user a clear way to resolve it.
+
+Never silently overwrite a user’s unsynchronized work.
+
+Keep timestamps internally consistent and display dates in the user’s local timezone.
+
+9. ACCOUNTS, LOCKS, AND SHARING
+
+AUTHENTICATION
+
+Use:
+- Secure password hashing.
+- Parameterized database queries.
+- Server-side authorization.
+- Appropriate session expiry.
+- Secure cookie settings where applicable.
+- Protection against relevant request and content-injection attacks.
+
+Do not store plaintext passwords.
+
+PASSWORD RESET
+
+Implement:
+- A reset request.
+- A securely generated reset token.
+- Expiry and single-use enforcement.
+- Password replacement.
+- Appropriate invalidation of affected sessions.
+
+Document email-delivery configuration.
+
+A mocked email or console token must not be presented as a completed production reset flow.
+
+APP LOCK
+
+Manual or inactivity locking must hide private content and require verification before access resumes.
+
+Do not implement app lock only as a cosmetic overlay that can be bypassed through ordinary backend requests.
+
+NOTE LOCKS
+
+Enforce locked-note access on the backend.
+
+Check attachments, exports, search snippets, and sharing routes as well as the editor.
+
+Do not claim end-to-end encryption unless it is actually implemented; it is not a selected feature.
+
+READ-ONLY SHARING
+
+Generate unguessable sharing tokens.
+
+Expose only the selected note and authorized media.
+
+Do not expose account information or unrelated notes.
+
+Require explicit owner authorization to share a locked note.
+
+Revoke access when the owner revokes the link or when the note’s deletion state requires it.
+
+10. REMINDERS, IMAGES, AND AUDIO
+
+REMINDERS
+
+Persist reminders in MySQL.
+
+Use a backend scheduling mechanism for due reminders.
+
+Support appropriate browser notifications when permission and browser capabilities allow them.
+
+Provide an in-app reminder view.
+
+Handle:
+- Permission denial.
+- Reminder edits and removal.
+- Timezone conversion.
+- Deleted or archived notes according to a documented policy.
+- Duplicate-delivery prevention.
+
+Background delivery must match the implemented browser and server capabilities. Explain limitations clearly.
+
+IMAGES
+
+Validate uploaded files.
+
+Enforce ownership and safe storage paths.
+
+Provide reasonable upload limits and useful errors.
+
+Display images responsively and include them in applicable backup and export flows.
+
+A locked or private image must not become publicly accessible through a guessed URL.
+
+AUDIO
+
+Support:
+- Microphone permission requests.
+- Start and stop recording.
+- Saving a recording.
+- Playback.
+- Safe upload and authorized retrieval.
+
+Handle unsupported recording formats and unavailable microphone access clearly.
+
+Do not add transcription.
+
+11. MYSQL DATA MODEL
+
+Design a normalized schema covering:
+- Users and sessions.
+- Password-reset tokens.
+- Notes.
+- Single-level folders.
+- Tags and note-tag relationships.
+- Attachments.
+- Reminders.
+- Saved searches.
+- Read-only sharing links.
+- Recent-note access metadata.
+- Synchronization revisions or change records.
+
+Each note needs appropriate fields for:
+- Owner.
+- Title.
+- Canonical rich-text content.
+- Searchable text or information needed to derive it.
+- Optional folder.
+- Pin state.
+- Favorite state.
+- Archive and deletion state.
+- Lock state.
+- Creation and modification timestamps.
+- Revision information.
+
+Use:
+- Foreign keys.
+- Appropriate indexes.
+- Transactions for related changes.
+- Constraints that prevent invalid relationships.
+
+Folder and tag relationships must not cross user boundaries.
+
+Include schema migrations and safe development seed data.
+
+12. EXPORT, BACKUP, AND RESTORE
+
+EXPORT
+
+Provide actual outputs for:
+- Plain text.
+- Markdown.
+- HTML.
+- PDF.
+
+Preserve the formatting supported by each format.
+
+Define how images and audio are represented.
+
+PDF output must handle long notes, page breaks, lists, and supported characters.
+
+Do not present an HTML file renamed with a .pdf extension as PDF export.
+
+Enforce ownership and unlock requirements before export.
+
+BACKUP
+
+Create a portable, versioned backup containing the user’s notes, organization metadata, reminders, and required attachment files.
+
+Do not include passwords, session tokens, reset tokens, or reusable private sharing credentials.
+
+RESTORE
+
+Validate the backup before importing.
+
+Handle malformed or incompatible files safely.
+
+Preserve existing notes unless the user explicitly chooses a replacement operation.
+
+Prevent accidental ID collisions and cross-account ownership.
+
+Report what was restored and any items that could not be restored.
+
+13. IMPLEMENTATION QUALITY
+
+Organize the backend into understandable modules, such as:
+- Authentication.
+- Notes.
+- Search.
+- Persistence.
+- Media.
+- Reminders.
+- Sharing.
+- Synchronization.
+
+Keep frontend rendering, editor integration, API access, and offline storage reasonably separated.
+
+Use:
+- Consistent API responses.
+- Input validation.
+- Appropriate HTTP status codes.
+- Configuration through environment variables.
+- Clear error handling.
+- Logging that avoids private note content and credentials.
+
+Never hardcode production credentials.
+
+Document external configuration and browser limitations.
+
+Do not present placeholder buttons, fake save states, or simulated services as completed functionality.
+
+14. IMPLEMENTATION PHASES
+
+Build in these phases while maintaining the full agreed scope:
+
+Phase 1:
+- Project setup.
+- MySQL schema.
+- Accounts.
+- Note creation and editing.
+- Rich text.
+- Autosave.
+- Approved Airy Cards interface.
+
+Phase 2:
+- Custom C++ search engine.
+- Search filters and syntax.
+- Highlighting and saved searches.
+- Search correctness and performance evaluation.
+
+Phase 3:
+- Optional folders and tags.
+- Pins, favorites, archive, and Trash.
+- Duplication, sorting, view modes, and Recent.
+- Reminders, images, and audio.
+
+Phase 4:
+- App lock and note locks.
+- Password reset.
+- Read-only sharing.
+- Offline editing.
+- Cross-device synchronization.
+
+Phase 5:
+- Export.
+- Backup and restore.
+- Themes.
+- Keyboard shortcuts.
+- Responsive and accessibility refinement.
+- End-to-end verification.
+
+15. FINAL DELIVERABLES
+
+Provide:
+- Frontend source.
+- C++ backend source.
+- CMake build configuration.
+- MySQL schema and migrations.
+- Configuration examples without secrets.
+- Setup and run instructions.
+- API documentation.
+- Search-engine documentation.
+- Meaningful automated tests.
+- Search performance evaluation.
+- A checklist using the original feature numbers.
+
+Clearly identify completed, partial, and blocked requirements.
+
+Keep feature 27 explicitly marked postponed.
+
+The final application must preserve the agreed purpose and design:
+
+MindKeep is a quick place to capture everyday notes, with reliable saving and a strong C++ search engine.
+
+Use the approved Airy Cards interface, the blue-leaning navy/violet/white palette, and “Create note…” in the note-entry area.
+
+Folders and tags remain optional.
