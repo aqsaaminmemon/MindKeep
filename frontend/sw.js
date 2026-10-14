@@ -1,9 +1,9 @@
-const CACHE = "mindkeep-shell-v65";
+const CACHE = "mindkeep-shell-v77";
 const ASSETS = [
   "/",
   "/index.html",
   "/styles.css",
-  "/peach.css?v=14",
+  "/peach.css?v=24",
   "/design.js?v=2",
   "/logo-peach.svg",
   "/fonts/Poppins-Regular.ttf",
@@ -16,7 +16,7 @@ const ASSETS = [
   "/fonts/garamond-regular.ttf",
   "/fonts/garamond-italic.ttf",
   "/app.js",
-  "/app.js?v=55",
+  "/app.js?v=63",
   "/masonry.js",
   "/note-preview.js",
   "/ui-feedback.js",

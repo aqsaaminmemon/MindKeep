@@ -258,6 +258,11 @@ void App::backup_routes() {
       parse_query(r.at("query"), r.at("filters"));
     }
     std::lock_guard lock(mutations);
+    if (!b["searches"].empty()) {
+      const auto count = db.query("SELECT COUNT(*) AS total FROM saved_searches WHERE user_id=?", {s.user});
+      if (number(count[0], "total") + static_cast<long long>(b["searches"].size()) > 5)
+        throw Error(409, "Restore would exceed 5 saved searches. Delete saved searches or reduce those in the backup first.");
+    }
     vector<std::string> written;
     // Restore indexing follows the same FIFO order as the imported notes.
     queue<std::string> noteids;

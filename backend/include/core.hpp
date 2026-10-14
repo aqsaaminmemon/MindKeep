@@ -40,9 +40,9 @@ struct Document {
 };
 
 struct Query {
-  std::vector<std::string> terms;
+  std::vector<std::string> terms, excluded;
   std::vector<std::vector<std::string>> phrases;
-  std::string folder, tag, state = "active", scope = "all";
+  std::string folder, tag, category, state = "active", scope = "all";
   long long before = 0, after = 0;
 };
 
@@ -82,7 +82,8 @@ public:
   void erase(const std::string &owner, const std::string &id);
   void rebuild(const std::vector<Document> &docs);
   std::vector<Hit> search(const std::string &owner, const Query &q,
-                          const std::set<std::string> &unlocked = {}) const;
+                          const std::set<std::string> &unlocked = {},
+                          const std::set<std::string> *eligible = nullptr) const;
   size_t memory_bytes() const;
 };
 } // namespace mk

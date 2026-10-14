@@ -49,7 +49,7 @@ A reminder is `null` or `{due_at:<UTC milliseconds>}`. Setting/editing/removing 
 | GET | `/api/reminders/events` | Undelivered in-app events, locked-note titles redacted |
 | POST | `/api/reminders/events/:id/ack` | Acknowledges event; prevents subsequent in-app delivery |
 
-State filters: `active`, `all` (active + archive), `archived`, `trash`, `favorites`, `pinned`, `locked`. Scope is `all` or `title`. Folder/tag filters take names; ownership is inherently scoped to the session's index. Dates apply to UTC modification dates. `after` is inclusive; `before` is exclusive. Invalid syntax is HTTP 400.
+State filters: `active`, `all` (active + archive), `archived`, `trash`, `favorites`, `pinned`, `locked`. Scope is `all`, `title`, or `content`. The optional `exclude` string contains whole words separated by spaces or commas; any note containing one of those normalized words in the chosen scope is excluded. Folder/tag filters take names; ownership is inherently scoped to the session's index. An optional `category` of `active`, `favorites`, `recent`, `reminders`, `archived`, or `trash` restricts the entire search to that tab, including when the query contains an inline state condition. Recent is limited to the five most recently opened active notes. Favorites and Reminders exclude archived and trashed notes. Dates apply to UTC modification dates. `after` is inclusive; `before` is exclusive. Invalid syntax is HTTP 400.
 
 ## Media and sharing
 
@@ -76,3 +76,5 @@ Sharing tokens are 256 random bits; only SHA-256 hashes are stored. Sharing is r
 Backup contains notes (including Trash/Archive/locks), folders, tags, reminders, saved searches and original attachment files. Passwords, sessions, reset tokens and reusable sharing tokens are excluded. Backup media cap is 40 MiB; restore HTTP payload cap 70 MiB, maximum 10,000 notes. A successful restore reports counts and warnings. Restored reminders are rescheduled; old notification-delivery history and Recent access history are not imported. Existing organization names are reused within the destination account. Export/backup files themselves are plaintext portable artifacts and should be stored privately.
 
 Status codes: 400 validation/syntax, 401 authentication/account change, 403 CSRF/origin, 404 inaccessible/missing object, 409 conflict or duplicate account, 413 size, 423 session/note locked, 429 rate limit, 500 unexpected storage failure, 503 external delivery/PDF unavailable.
+
+Saved searches are capped at five per account. A sixth creation returns HTTP 409; deleting one frees a slot. Restores that would exceed the cap are rejected before importing data. Existing saved searches are not removed automatically.

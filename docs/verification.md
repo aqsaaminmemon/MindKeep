@@ -1,5 +1,3 @@
-> Historical verification notes. Earlier screenshot artifacts are retained locally; the current public screenshots are `screenshots/home.png`, `screenshots/editor.png`, and `screenshots/search.png`.
-
 # Verification evidence — 10 October 2026
 
 The folder was initially empty. After the power interruption, all written source files and vendored dependencies were intact; unfinished modules/frontend/tests were continued. The first runtime checks exposed missing architecture-specific OpenSSL headers, a schema collation mismatch, and MySQL rejecting transaction-control SQL through prepared statements. These were corrected. A stalled restricted-sandbox MySQL fixture was replaced by an isolated working local instance. No existing system database was changed.
@@ -92,3 +90,9 @@ Same-machine in-process benchmark before this change (100 searches per size): at
 Purple Blue theme: light-mode accents and action backgrounds plus the logo SVG filter now use #6A5ACD, with matching hover shade #5B4BB6 and a lighter related accent for dark-mode text. Existing violet backgrounds and Garamond stay unchanged. Shell cache v41. Browser screenshot: docs/screenshots/purple-blue-theme.png.
 
 Dark-mode correction: theme classes now apply to both the document root and body, resolving inherited light background/text colors. Dark navy page (#141A30), blue surface (#202741), violet selection (#343052), Purple Blue buttons and lighter violet action text form the dark palette. Native controls/scrollbars, colored note cards, welcome-page sample notes, notifications, errors, highlights and saved light-mode rich-text colors adapt to dark display. Saved note content is not recolored by the theme change. Browser QA on a synthetic account verified settings, note cards, saved dark text/white highlights in the editor and welcome-page samples. Text contrast: primary 12.79:1, secondary 8.03:1, action text on selected surface 6.05:1, primary button text 5.31:1. Screenshots: docs/screenshots/dark-notes.png, dark-settings.png and dark-editor.png. Search/action/editor-history regressions pass; shell cache v42.
+
+## GitHub synchronization checks — 14 October 2026
+
+The current source passed a fresh Release backend build, CTest search correctness, all frontend JavaScript syntax checks, and all eleven JavaScript regression scripts. The search test DOM fixtures were updated for the filter button's expanded state and the search-results heading class. Python test files passed syntax parsing. The local app was not running, so the API integration scripts were not rerun during this synchronization.
+
+The README now links to `current-home.jpg`, `current-editor.jpg`, and `current-search.jpg`, captured from the current production markup, styles, and rendering functions using an isolated temporary demonstration-data fixture. The search capture shows content-only search, excluded words, and the saved-search panel. These screenshots verify appearance; they do not establish backend persistence. The temporary fixture is not included in the repository.

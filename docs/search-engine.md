@@ -90,3 +90,15 @@ Search hits are ordered through a `std::priority_queue` binary heap: higher scor
 ## HTTP result loading
 
 Results are loaded in chunks of 200 using parameterized SQL: one joined note/reminder/access/Trash/unlock query, one tags query and one attachments query per chunk. A hash map associates metadata with note IDs and the final output restores the search heap order. This replaces several SQL round trips per hit, preserves full note metadata for opening/favoriting, and keeps account/session boundaries enforced. `tests/search_prefix_tests.py` checks metadata parity, lock/unlock behavior and results crossing the chunk boundary.
+
+## Search panel options
+
+The Search in dropdown supports Title and content, Titles, and Content only. Content-only search uses body postings and phrase positions without title scoring or title-prefix matches. Exclude words uses complete Unicode-normalized words in the selected scope; multiple exclusions are combined so any excluded word removes a note. It also works with folder/tag filters and an empty positive query.
+
+Save search stores the query and panel filters under a user-chosen name. Selecting a saved search from the search panel restores Content only and exclusions along with Folder and Tag and reruns the C++ search. Previously saved searches without an exclusion field still work.
+
+Searches started from Archive or Trash are restricted to that category. The backend enforces the category even when an inline state condition is present. Saved searches preserve and restore it.
+
+Saved searches are listed directly in the search panel without a separate sidebar section. Clicking a named entry restores and runs its saved options. Clearing the search text ends the search, resets current controls, and restores the normal category view; in All Notes this shows Create note again. Saved definitions are retained.
+
+Each UI search uses the current tab: All Notes includes active notes, Favorites includes active favorites, Reminders includes active reminder notes, and Recent includes the five latest active visits. Archive and Trash remain isolated. The C++ backend enforces category restrictions before result ranking; saved searches preserve that category. Settings → Manage saved searches is used only for saved-search deletion. Folder/tag actions remain in their sidebar three-dot menus.

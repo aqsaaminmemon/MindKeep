@@ -33,6 +33,7 @@ const elements = {
   "filter-folder": { value: "" },
   "filter-tag": { value: "" },
   "filter-scope": { value: "all" },
+  "filter-exclude": { value: "" },
   "search-error": {},
   collection: {},
 };
@@ -73,7 +74,7 @@ const context = vm.createContext({
 });
 vm.runInContext(
   source.slice(
-    source.indexOf("async function search()"),
+    source.indexOf("function readSearchFilters()"),
     source.indexOf("function editorContext()"),
   ),
   context,

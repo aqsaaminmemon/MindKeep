@@ -12,25 +12,25 @@ MindKeep is a personal notes app for capturing ideas, everyday plans, and things
 
 ## Screenshots
 
-Demonstration notes are used in these screenshots.
+Current interface captured with demonstration notes.
 
 ### Home
 
 A colorful workspace with quick capture and flexible note layouts.
 
-![MindKeep home page](docs/screenshots/home.png)
+![MindKeep home page](docs/screenshots/current-home.jpg)
 
 ### Rich-text editor
 
 Shape an idea with formatting, checklists, and optional organization.
 
-![MindKeep rich-text editor](docs/screenshots/editor.png)
+![MindKeep rich-text editor](docs/screenshots/current-editor.jpg)
 
 ### Search
 
-Find notes with highlighted matches and folder or tag filters.
+Find notes with highlighted matches, content-only search, exclusions, and reusable saved searches.
 
-![MindKeep search with filters](docs/screenshots/search.png)
+![MindKeep search with filters](docs/screenshots/current-search.jpg)
 
 ## Built with
 

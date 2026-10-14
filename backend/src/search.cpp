@@ -82,6 +82,7 @@ Query parse_query(const std::string &input, const json &filters) {
   q.tag = filters.value("tag", "");
   q.state = filters.value("state", "active");
   q.scope = filters.value("scope", "all");
+  q.excluded = tokenize(filters.value("exclude", ""));
   if (filters.contains("before") && !filters["before"].get<std::string>().empty())
     q.before = date_value(filters["before"]);
   if (filters.contains("after") && !filters["after"].get<std::string>().empty())
@@ -154,8 +155,15 @@ Query parse_query(const std::string &input, const json &filters) {
   if (!std::set<std::string>{"active", "all", "archived", "trash", "favorites", "pinned", "locked"}
            .contains(q.state))
     throw std::invalid_argument("Unknown note state");
-  if (q.scope != "all" && q.scope != "title")
+  if (q.scope != "all" && q.scope != "title" && q.scope != "content")
     throw std::invalid_argument("Unknown search scope");
+  // A tab-scoped search cannot escape its collection through inline state conditions.
+  q.category = filters.value("category", "");
+  if (!q.category.empty()) {
+    if (!std::set<std::string>{"active", "favorites", "recent", "reminders", "archived", "trash"}.contains(q.category))
+      throw std::invalid_argument("Unknown search category");
+    q.state = (q.category == "archived" || q.category == "trash") ? q.category : "active";
+  }
   if (q.before && q.after && q.after >= q.before)
     throw std::invalid_argument("After date must precede before date");
   return q;
@@ -271,12 +279,17 @@ static bool phrase_match(const std::vector<std::vector<int>> &positions) {
 }
 
 std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
-                                     const std::set<std::string> &unlocked) const {
+                                     const std::set<std::string> &unlocked,
+                                     const std::set<std::string> *eligible) const {
   std::shared_lock lock(mutex);
   auto user = users.find(owner);
   if (user == users.end())
     return {};
   auto &l = user->second;
+  const auto in_scope = [&](const Posting &posting) {
+    return (q.scope != "content" && !posting.title.empty()) ||
+           (q.scope != "title" && !posting.body.empty());
+  };
   // Start from the smallest indexed filter rather than copying every note ID.
   std::vector<const std::set<std::string> *> restrictions;
   const std::set<std::string> empty;
@@ -286,6 +299,9 @@ std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
   };
   if (q.state != "all")
     group(l.states, q.state);
+  if (q.category == "favorites") group(l.states, "favorites");
+  if (eligible) restrictions.push_back(eligible);
+  if ((q.category == "recent" || q.category == "reminders") && !eligible) return {};
   if (!q.folder.empty())
     group(l.folders, fold(q.folder));
   if (!q.tag.empty())
@@ -326,14 +342,14 @@ std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
   std::set<std::string> word_ids;
   if (phrase_seed) {
     for (auto &[id, posting] : *phrase_seed)
-      if (q.scope != "title" || !posting.title.empty())
+      if (in_scope(posting))
         word_ids.insert(id);
     restrictions.push_back(&word_ids);
   } else if (!seed_prefix.empty()) {
     for (auto i = l.terms.lower_bound(seed_prefix);
          i != l.terms.end() && i->first.starts_with(seed_prefix); ++i)
       for (auto &[id, posting] : i->second)
-        if (q.scope != "title" || !posting.title.empty())
+        if (in_scope(posting))
           word_ids.insert(id);
     restrictions.push_back(&word_ids);
   }
@@ -369,7 +385,7 @@ std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
     for (auto i = l.terms.lower_bound(term); i != l.terms.end() && i->first.starts_with(term);
          ++i) {
       for (auto &[id, posting] : i->second) {
-        if (!candidates.contains(id) || (q.scope == "title" && posting.title.empty()))
+        if (!candidates.contains(id) || !in_scope(posting))
           continue;
         auto &frequency = matches[id];
         frequency.first += posting.title.size();
@@ -388,7 +404,7 @@ std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
       }
       node = next->second.get();
     }
-    if (found)
+    if (found && q.scope != "content")
       ids.insert(node->ids.begin(), node->ids.end());
     intersect(ids);
     if (candidates.empty())
@@ -407,7 +423,7 @@ std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
     if (rarest) {
       std::set<std::string> ids;
       for (auto &[id, posting] : *rarest)
-        if (candidates.contains(id) && (q.scope != "title" || !posting.title.empty()))
+        if (candidates.contains(id) && (in_scope(posting)))
           ids.insert(id);
       intersect(ids);
     }
@@ -425,13 +441,22 @@ std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
         tp.push_back(posting.title);
         bp.push_back(posting.body);
       }
-      if (found && (phrase_match(tp) || (q.scope != "title" && phrase_match(bp))))
+      if (found && ((q.scope != "content" && phrase_match(tp)) ||
+                    (q.scope != "title" && phrase_match(bp))))
         matches.insert(id);
     }
     intersect(matches);
     if (candidates.empty())
       return {};
   }
+  // Exclusions match complete normalized words in the selected search area.
+  for (const auto &term : q.excluded) {
+    auto entry = l.terms.find(term);
+    if (entry == l.terms.end()) continue;
+    for (const auto &[id, posting] : entry->second)
+      if (in_scope(posting)) candidates.erase(id);
+  }
+  if (candidates.empty()) return {};
   std::unordered_map<std::string, double> weights;
   auto locked = l.states.find("locked");
   double total = l.docs.size() - (locked == l.states.end() ? 0 : locked->second.size());
@@ -460,9 +485,10 @@ std::vector<Hit> SearchIndex::search(const std::string &owner, const Query &q,
       if (i != matches.end()) {
         double tf = i->second.first, bf = i->second.second;
         double idf = weights.at(term);
-        score += idf * (3 * tf / (tf + 1) + (q.scope == "title" ? 0 : bf / (bf + 1)));
+        score += idf * ((q.scope == "content" ? 0 : 3 * tf / (tf + 1)) +
+                        (q.scope == "title" ? 0 : bf / (bf + 1)));
       }
-      if (fold(d.title).starts_with(term))
+      if (q.scope != "content" && fold(d.title).starts_with(term))
         score += 2;
     }
     score += q.phrases.size() * 4;

@@ -324,8 +324,8 @@ function confirmDialog(title, message, action, label = "Confirm") {
   );
   $("cancel-action").onclick = closeUtility;
   $("confirm-action").onclick = handle(async () => {
-    await action();
-    closeUtility();
+    const closeAfterAction = await action();
+    if (closeAfterAction !== false) closeUtility();
   });
 }
 function authScreen(mode) {
@@ -882,7 +882,7 @@ function card(n) {
   const previewHTML = !state.results && !n.protected
     ? formattedPreview(doc.body) || matched(preview.slice(0, 270))
     : matched(preview.slice(0, 270));
-  return `<article class="note-card ${state.selecting ? "selectable" : ""} ${state.selectedNotes?.has(n.id) ? "note-selected" : ""}" data-id="${escape(n.id)}" data-color="${escape(n.color || "white")}" data-tone="${tone}">${state.selecting ? `<label class="note-select-control"><input type="checkbox" data-select-note="${escape(n.id)}" ${state.selectedNotes?.has(n.id) ? "checked" : ""} ${n.protected || n.deleted ? "disabled" : ""} aria-label="Select ${escape(n.title || "Untitled note")}"><span>${n.protected ? "Unlock to select" : "Select"}</span></label>` : ""}${image ? `<img class="card-image" src="${escape(mediaURL(image, n))}" alt="${escape(image.name)}" loading="lazy">` : ""}<button class="card-open" data-open="${escape(n.id)}" aria-label="Open ${escape(n.title || "Untitled note")}"><div class="card-heading"><h2 class="card-title">${n.protected ? icon("lock") + " Locked note" : matched(n.title || "Untitled note")}</h2>${n.pinned ? `<span class="card-pin">${icon("pin")}</span>` : ""}</div>${!checklist.length || state.results ? `<p class="card-text">${n.protected ? "Verify your password to open." : previewHTML}</p>` : ""}</button>${
+  return `<article class="note-card ${state.selecting ? "selectable" : ""} ${state.selectedNotes?.has(n.id) ? "note-selected" : ""}" data-id="${escape(n.id)}" data-color="${escape(n.color || "white")}" data-tone="${tone}">${state.selecting ? `<label class="note-select-control"><input type="checkbox" data-select-note="${escape(n.id)}" ${state.selectedNotes?.has(n.id) ? "checked" : ""} ${n.protected || n.deleted ? "disabled" : ""} aria-label="Select ${escape(n.title || "Untitled note")}"><span>${n.protected ? "Unlock to select" : "Select"}</span></label>` : ""}${image ? `<img class="card-image" src="${escape(mediaURL(image, n))}" alt="${escape(image.name)}" loading="lazy">` : ""}<button class="card-open" data-open="${escape(n.id)}" aria-label="Open ${escape(n.title || "Untitled note")}"><div class="card-heading"><h2 class="card-title">${n.protected ? icon("lock") + " Locked note" : state.results && state.filters?.scope === "content" ? escape(n.title || "Untitled note") : matched(n.title || "Untitled note")}</h2>${n.pinned ? `<span class="card-pin">${icon("pin")}</span>` : ""}</div>${!checklist.length || state.results ? `<p class="card-text">${n.protected ? "Verify your password to open." : previewHTML}</p>` : ""}</button>${
     checklist.length && !state.results
       ? `<ul class="card-checklist">${checklist
           .slice(0, 5)
@@ -960,13 +960,15 @@ function render() {
         .join("");
     $("filter-" + type).value = current;
   }
-  $("saved-section").hidden = !state.searches.length;
-  $("saved-nav").innerHTML = state.searches
-    .map(
-      (s) =>
-        `<button class="nav-item" data-saved="${escape(s.id)}">${icon("search")}<span class="nav-name">${escape(s.name)}</span></button>`,
-    )
-    .join("");
+  $("saved-search-count").textContent = `${state.searches.length}/5`;
+  $("save-search").disabled = state.searches.length >= 5;
+  $("save-search").title = state.searches.length >= 5
+    ? "Five-search limit reached. Delete one in Settings → Manage saved searches."
+    : "Save these options (up to five saved searches).";
+  $("saved-filter-list").innerHTML = state.searches.length
+    ? state.searches.map((saved) =>
+        `<button type="button" class="secondary" data-saved-search="${escape(saved.id)}" aria-label="Run saved search ${escape(saved.name)}">${icon("search")}<span>${escape(saved.name)}</span></button>`).join("")
+    : '<p class="saved-search-empty">No saved searches yet. Save a search above to reuse it here.</p>';
   let title = state.results
     ? "Search results"
     : state.folder
@@ -975,8 +977,9 @@ function render() {
         ? "# " + state.tags.find((t) => t.id === state.tag)?.name
         : nav.find((v) => v[0] === state.view)?.[2];
   $("view-title").textContent = title || "All notes";
+  $("view-title").classList.toggle("search-results-title", !!state.results);
   $("view-description").textContent = state.results
-    ? `${notes.length} ${notes.length === 1 ? "note" : "notes"} found`
+    ? `${notes.length} ${notes.length === 1 ? "note" : "notes"} found${state.view === "all" ? "" : ` in ${nav.find(([view]) => view === state.view)?.[2] || "this collection"}`}`
     : {
         all: "A little space for everything on your mind.",
         reminders: "The things you want to come back to.",
@@ -1078,13 +1081,71 @@ function navigate(view, folder = null, tag = null) {
   $("drawer-shade").hidden = true;
   render();
 }
-async function search() {
-  const query = $("search").value.trim();
-  const filters = {
+function clearSearch() {
+  ++state.searchSerial;
+  state.query = "";
+  state.results = null;
+  state.filters = {};
+  state.highlightTerms = [];
+  if (state.sort === "relevance") state.sort = "updated";
+  $("search").value = "";
+  for (const key of ["folder", "tag", "exclude"])
+    $("filter-" + key).value = "";
+  $("filter-scope").value = "all";
+  $("filters").hidden = true;
+  $("filter-toggle").setAttribute("aria-expanded", "false");
+  $("search-error").hidden = true;
+  highlight([]);
+  render();
+}
+function readSearchFilters() {
+  return {
     folder: $("filter-folder").value,
     tag: $("filter-tag").value,
     scope: $("filter-scope").value,
+    exclude: $("filter-exclude").value.trim(),
+    category: ({ archive: "archived", trash: "trash", favorites: "favorites", recent: "recent", reminders: "reminders" })[state.view] || "active",
   };
+}
+function saveSearch() {
+  onlineOnly();
+  if (state.searches.length >= 5) {
+    notify("You can save up to 5 searches. Delete one in Settings → Manage saved searches first.");
+    return;
+  }
+  const query = $("search").value.trim();
+  const filters = readSearchFilters();
+  if (!query && !filters.folder && !filters.tag && !filters.exclude && filters.scope === "all") {
+    notify("Enter a search or choose a filter before saving.");
+    return;
+  }
+  inputDialog("Save search", "Search name", async (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) throw new Error("Enter a name for this search.");
+    if (state.searches.length >= 5)
+      throw new Error("You can save up to 5 searches. Delete one in Settings first.");
+    await api("/searches", "POST", { name: trimmed, query, filters });
+    state.searches = (await api("/searches")).searches;
+    render();
+    await stash();
+    notify("Search saved. Select it from Saved searches to reuse it.");
+  });
+}
+async function openSavedSearch(saved) {
+  if (!saved) return;
+  state.view = ({ archived: "archive", trash: "trash", favorites: "favorites", recent: "recent", reminders: "reminders" })[saved.filters.category] || "all";
+  state.folder = null;
+  state.tag = null;
+  $("search").value = saved.query;
+  for (const key of ["folder", "tag", "scope", "exclude"])
+    $("filter-" + key).value = saved.filters[key] || (key === "scope" ? "all" : "");
+  $("filters").hidden = false;
+  $("filter-toggle").setAttribute("aria-expanded", "true");
+  await search();
+}
+async function search() {
+  const query = $("search").value.trim();
+  const filters = readSearchFilters();
   state.filters = filters;
   state.query = query;
   state.highlightTerms = [];
@@ -1097,10 +1158,12 @@ async function search() {
       ([k, v]) =>
         v &&
         !(k === "state" && v === "active") &&
-        !(k === "scope" && v === "all"),
+        !(k === "scope" && v === "all") &&
+        k !== "category",
     )
   ) {
     state.results = null;
+    if (state.sort === "relevance") state.sort = "updated";
     render();
     return;
   }
@@ -1492,7 +1555,7 @@ async function addOrganization(type) {
 function settingsDialog() {
   dialog(
     "Application settings",
-    `<p>A calm space, the way you like it.</p><label>Appearance</label><div class="settings-row"><button class="secondary" data-theme="light">Light</button><button class="secondary" data-theme="dark">Dark</button></div><label class="sound-setting"><input id="button-sounds" type="checkbox" ${buttonSoundsEnabled() ? "checked" : ""}> Button click sounds</label><label>Lock after inactivity<select id="idle-setting">${[1, 5, 15, 30, 60, 120].map((n) => `<option value="${n}" ${n === state.idleMinutes ? "selected" : ""}>${n} minutes</option>`).join("")}</select></label><div class="menu-list"><button id="backup-library">${icon("download")}Back up your library</button><button id="restore-library">${icon("restore")}Restore a backup</button><button id="manage-organization">${icon("folder")}Manage folders, tags, and searches</button><button id="recover-device">${icon("restore")}Recover previous device drafts</button><button id="show-shortcuts">${icon("compact")}Keyboard shortcuts</button></div>`,
+    `<p>A calm space, the way you like it.</p><label>Appearance</label><div class="settings-row"><button class="secondary" data-theme="light">Light</button><button class="secondary" data-theme="dark">Dark</button></div><label class="sound-setting"><input id="button-sounds" type="checkbox" ${buttonSoundsEnabled() ? "checked" : ""}> Button click sounds</label><label>Lock after inactivity<select id="idle-setting">${[1, 5, 15, 30, 60, 120].map((n) => `<option value="${n}" ${n === state.idleMinutes ? "selected" : ""}>${n} minutes</option>`).join("")}</select></label><div class="menu-list"><button id="backup-library">${icon("download")}Back up your library</button><button id="restore-library">${icon("restore")}Restore a backup</button><button id="manage-organization">${icon("search")}Manage saved searches</button><button id="recover-device">${icon("restore")}Recover previous device drafts</button><button id="show-shortcuts">${icon("compact")}Keyboard shortcuts</button></div>`,
   );
   document
     .querySelectorAll("[data-theme]")
@@ -1578,6 +1641,15 @@ function removeOrganization(type, id) {
     `Delete ${kind}?`,
     `Delete “${item.name}”? Your notes will be kept.`,
     async () => {
+      if (type === "searches") {
+        await api("/searches/" + id, "DELETE");
+        state.searches = (await api("/searches")).searches;
+        render();
+        await stash();
+        notify("Saved search deleted. Your notes are unchanged.");
+        organizationDialog();
+        return false;
+      }
       readEditor();
       await synchronize();
       const affected = Object.values(state.pending).some(({ note }) =>
@@ -1672,27 +1744,12 @@ function organizationMenu(type, id, anchor) {
 }
 function organizationDialog() {
   dialog(
-    "A little organization",
-    `<p>Removing a folder or tag keeps its notes. Folders are single-level.</p>${[
-      ["folders", state.folders],
-      ["tags", state.tags],
-      ["searches", state.searches],
-    ]
-      .map(
-        ([type, items]) =>
-          `<label>${type.toUpperCase()}</label><div class="menu-list">${items.map((item) => `<div class="settings-row"><span style="flex:1;padding:10px;font-size:13px">${escape(item.name)}</span>${type !== "searches" ? `<button class="icon-button" data-rename="${type}:${item.id}" aria-label="Rename ${escape(item.name)}">${icon("notes")}</button>` : ""}<button class="icon-button danger" data-remove="${type}:${item.id}" aria-label="Remove ${escape(item.name)}">${icon("trash")}</button></div>`).join("") || "<p>None yet.</p>"}</div>`,
-      )
-      .join("")}`,
+    "Manage saved searches",
+    `<p>${state.searches.length}/5 saved searches. Deleting a saved search keeps all your notes.</p><div class="menu-list">${state.searches.map((item) => `<div class="settings-row"><span class="saved-search-name">${escape(item.name)}</span><button class="icon-button danger" data-remove-search="${escape(item.id)}" aria-label="Delete saved search ${escape(item.name)}">${icon("trash")}</button></div>`).join("") || "<p>No saved searches yet.</p>"}</div>`,
   );
   $("utility-body").onclick = handle((event) => {
-    const remove = event.target.closest("[data-remove]")?.dataset.remove;
-    const rename = event.target.closest("[data-rename]")?.dataset.rename;
-    const selected = remove || rename;
-    if (!selected) return;
-    onlineOnly();
-    const [type, id] = selected.split(":");
-    if (remove) removeOrganization(type, id);
-    else renameOrganization(type, id);
+    const id = event.target.closest("[data-remove-search]")?.dataset.removeSearch;
+    if (id) removeOrganization("searches", id);
   });
 }
 async function restoreFile(file) {
@@ -1838,14 +1895,6 @@ function wireEvents() {
     if (button.dataset.nav) navigate(button.dataset.nav);
     if (button.dataset.folder) navigate("folder", button.dataset.folder);
     if (button.dataset.tag) navigate("tag", null, button.dataset.tag);
-    if (button.dataset.saved) {
-      const saved = state.searches.find((s) => s.id === button.dataset.saved);
-      $("search").value = saved.query;
-      for (const key of ["folder", "tag", "scope"])
-        $("filter-" + key).value =
-          saved.filters[key] || { scope: "all" }[key] || "";
-      await search();
-    }
   });
   $("quick-create").onclick = handle(() => createNote());
   $("create-note").onclick = handle(() => createNote());
@@ -1870,15 +1919,22 @@ function wireEvents() {
     state.highlightTerms = [];
     highlight([]);
     if (!$("search").value.trim()) {
-      search();
+      clearSearch();
     } else {
       state.query = $("search").value.trim();
       render();
       searchTimer = setTimeout(search, 300);
     }
   };
+  $("save-search").onclick = handle(saveSearch);
+  $("saved-filter-list").onclick = handle(async (event) => {
+    const button = event.target.closest("[data-saved-search]");
+    if (button)
+      await openSavedSearch(state.searches.find((s) => s.id === button.dataset.savedSearch));
+  });
   $("filter-toggle").onclick = () => {
     $("filters").hidden = !$("filters").hidden;
+    $("filter-toggle").setAttribute("aria-expanded", String(!$("filters").hidden));
   };
   document
     .querySelectorAll("#filters select,#filters input")

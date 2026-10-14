@@ -91,6 +91,23 @@
   scrollbar-width: thin;
   scrollbar-color: var(--peach-scrollbar) transparent;
 }
+:root[data-design="peach"] .sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+:root[data-design="peach"] .sidebar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 10px;
+}
+:root[data-design="peach"] .sidebar::-webkit-scrollbar-thumb {
+  border: 2px solid var(--sidebar);
+  border-radius: 999px;
+  background: var(--peach-scrollbar);
+}
+:root[data-design="peach"] .sidebar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
 :root[data-design="peach"] .nav-item {
   border-radius: 14px;
   padding: 12px 13px;
@@ -119,6 +136,9 @@
 :root[data-design="peach"] .page-heading h1 {
   color: var(--text);
   font-size: 36px;
+}
+:root[data-design="peach"] .page-heading h1.search-results-title {
+  font-size: 24px;
 }
 :root[data-design="peach"] .composer {
   border-color: transparent;
@@ -270,6 +290,9 @@
   }
   :root[data-design="peach"] .page-heading h1 {
     font-size: 30px;
+  }
+  :root[data-design="peach"] .page-heading h1.search-results-title {
+    font-size: 21px;
   }
   :root[data-design="peach"] .search-bar {
     border-radius: 12px;
@@ -499,4 +522,151 @@
   scrollbar-width: thin;
   scrollbar-gutter: stable;
   padding-right: 8px;
+}
+
+:root[data-design="peach"] .exclude-filter {
+  flex: 1 1 220px;
+}
+:root[data-design="peach"] .exclude-filter input {
+  width: 100%;
+}
+:root[data-design="peach"] #exclude-hint {
+  max-width: 300px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+:root[data-design="peach"] #save-search {
+  align-self: center;
+  white-space: nowrap;
+}
+
+:root[data-design="peach"] .filter-panel {
+  align-items: flex-start;
+  gap: 12px 14px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 82%, var(--peach-story));
+}
+:root[data-design="peach"] .filter-panel label {
+  gap: 5px;
+}
+:root[data-design="peach"] .filter-panel input,
+:root[data-design="peach"] .filter-panel select {
+  min-height: 38px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+:root[data-design="peach"] .filter-panel > p {
+  margin-top: 2px;
+  line-height: 1.5;
+}
+:root[data-design="peach"] #filter-toggle[aria-expanded="true"] {
+  background: var(--selected);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+:root[data-design="peach"] #save-search {
+  align-self: flex-start;
+  margin-top: 22px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+:root[data-design="peach"] .saved-search-panel {
+  width: 100%;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+:root[data-design="peach"] .saved-search-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 4px;
+  margin: 0 -4px;
+  scrollbar-width: thin;
+}
+:root[data-design="peach"] .saved-search-buttons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--peach-story) 35%, var(--surface));
+  border-color: color-mix(in srgb, var(--border) 75%, var(--surface));
+  color: var(--accent);
+  font-size: 13px;
+  text-align: left;
+}
+:root[data-design="peach"] .saved-search-buttons button span {
+  overflow-wrap: anywhere;
+}
+:root[data-design="peach"] .saved-search-buttons button svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+:root[data-design="peach"] .saved-search-name {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 0;
+  overflow-wrap: anywhere;
+}
+:root[data-design="peach"] #saved-search-count {
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+/* Keep bulk-selection actions together as one quiet, compact control bar. */
+:root[data-design="peach"] #selection-actions {
+  padding: 8px 10px;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 4px 14px #9c604009;
+}
+:root[data-design="peach"] #selection-count {
+  margin: 0 8px 0 2px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+:root[data-design="peach"] #selection-actions button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+:root[data-design="peach"] #cancel-selection {
+  color: var(--muted);
+}
+:root[data-design="peach"] #cancel-selection:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+:root[data-design="peach"] #delete-selected-notes:disabled {
+  color: var(--muted);
+  background: var(--bg);
+  opacity: 1;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+@media (max-width: 620px) {
+  :root[data-design="peach"] #selection-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
 }

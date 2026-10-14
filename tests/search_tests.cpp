@@ -94,6 +94,80 @@ int main() {
     check(prefixes.search("prefix-owner", parse_query("sunr")).empty(),
           "Deleting removes prefix vocabulary membership");
 
+    SearchIndex scoped;
+    auto title_only = doc("title-only", "scope-owner", "Project café", "Quiet morning");
+    auto body_only = doc("body-only", "scope-owner", "Notebook", "Project café planning");
+    auto both = doc("both", "scope-owner", "Project café", "Project café meeting");
+    auto private_scope = doc("other", "other-owner", "Notebook", "Project café planning");
+    auto locked_scope = doc("locked", "scope-owner", "Notebook", "Project café planning");
+    locked_scope.locked = true;
+    for (auto *d : {&title_only, &body_only, &both, &private_scope, &locked_scope}) {
+      d->folder = "Work";
+      d->tags = {"Ideas"};
+    }
+    scoped.rebuild({title_only, body_only, both, private_scope, locked_scope});
+    auto ids = [&](const Query &query, const std::set<std::string> &unlocked = {}) {
+      std::set<std::string> result;
+      for (auto &hit : scoped.search("scope-owner", query, unlocked)) result.insert(hit.id);
+      return result;
+    };
+    check(ids(parse_query("proj", {{"scope", "content"}})) ==
+              std::set<std::string>{"body-only", "both"}, "Content scope excludes title-only prefixes");
+    check(ids(parse_query("\"project café\"", {{"scope", "content"}})) ==
+              std::set<std::string>{"body-only", "both"}, "Content-only phrases ignore title positions");
+    check(ids(parse_query("project", {{"scope", "title"}})) ==
+              std::set<std::string>{"title-only", "both"}, "Title scope remains correct");
+    check(ids(parse_query("project", {{"scope", "content"}, {"exclude", "MEETING"},
+                                    {"folder", "Work"}, {"tag", "Ideas"}})) ==
+              std::set<std::string>{"body-only"}, "Content, exclusion, folder and tag combine");
+    check(ids(parse_query("project", {{"exclude", "planning, meeting"}})) ==
+              std::set<std::string>{"title-only"}, "Multiple exclusion words remove matching notes");
+    check(ids(parse_query("project", {{"scope", "content"}, {"exclude", "proj"}})).size() == 2,
+          "Excluded words are whole-word matches, not prefixes");
+    check(ids(parse_query("project", {{"scope", "title"}, {"exclude", "meeting"}})).size() == 2,
+          "Title exclusions do not inspect the content");
+    check(ids(parse_query("", {{"scope", "content"}, {"exclude", "CAFÉ"}})) ==
+              std::set<std::string>{"title-only"}, "Exclude-only search respects scope and Unicode");
+    check(ids(parse_query("project", {{"scope", "content"}}), {"locked"}).size() == 3,
+          "Content search retains explicit locked-note verification");
+    auto body_rank = scoped.search("scope-owner", parse_query("project", {{"scope", "content"}}));
+    check(body_rank.size() == 2 && body_rank[0].score == body_rank[1].score,
+          "Content-only ranking ignores title matches and boosts");
+    auto archived_scope = body_only;
+    archived_scope.id = "archive";
+    archived_scope.archived = true;
+    auto trashed_scope = body_only;
+    trashed_scope.id = "trash";
+    trashed_scope.deleted = true;
+    scoped.upsert(archived_scope);
+    scoped.upsert(trashed_scope);
+    check(ids(parse_query("project", {{"category", "archived"}, {"scope", "content"}})) ==
+              std::set<std::string>{"archive"}, "Archive category searches only archived notes");
+    check(ids(parse_query("project state:all", {{"category", "trash"}, {"exclude", "meeting"}})) ==
+              std::set<std::string>{"trash"}, "Trash search cannot escape with an inline state condition");
+    check(ids(parse_query("", {{"category", "archived"}, {"exclude", "planning"}})).empty(),
+          "Archive exclusions apply without a positive query");
+    both.favorite = true;
+    archived_scope.favorite = true;
+    trashed_scope.favorite = true;
+    scoped.upsert(both);scoped.upsert(archived_scope);scoped.upsert(trashed_scope);
+    check(ids(parse_query("project state:all", {{"category", "favorites"}})) ==
+              std::set<std::string>{"both"}, "Favorites tab excludes nonfavorites, archive and trash");
+    check(ids(parse_query("project state:trash", {{"category", "active"}})) ==
+              std::set<std::string>{"body-only", "both", "title-only"}, "All Notes search remains in active notes");
+    const std::set<std::string> recent_ids = {"body-only"};
+    const auto recent_hits = scoped.search("scope-owner", parse_query("project", {{"category", "recent"}}), {}, &recent_ids);
+    check(recent_hits.size() == 1 && recent_hits[0].id == "body-only", "Recent eligibility is applied before ranking");
+    check(scoped.search("scope-owner", parse_query("project", {{"category", "recent"}})).empty(),
+          "Recent cannot search an unrestricted library without visit eligibility");
+    const std::set<std::string> reminder_ids = {"title-only", "archive"};
+    const auto reminder_hits = scoped.search("scope-owner", parse_query("project", {{"category", "reminders"}}), {}, &reminder_ids);
+    check(reminder_hits.size() == 1 && reminder_hits[0].id == "title-only", "Reminders stays active and restricted to reminder notes");
+    body_only.body = "Project café meeting";
+    scoped.upsert(body_only);
+    check(ids(parse_query("project", {{"scope", "content"}, {"exclude", "meeting"}})).empty(),
+          "Exclusions follow edited postings");
+
     SearchIndex idx;
     auto a = doc("a", "alice", "Weekend ideas", "take the scenic route and buy fresh flowers");
     a.folder = "Personal Ideas";

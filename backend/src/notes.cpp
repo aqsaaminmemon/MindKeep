@@ -534,7 +534,16 @@ void App::note_routes() {
     auto b = json::parse(req.body);
     auto query = parse_query(b.value("query", ""), b.value("filters", json::object()));
     std::lock_guard lock(mutations);
-    auto hits = index.search(s.user, query, unlocks(s));
+    std::set<std::string> eligible;
+    const std::set<std::string> *restriction = nullptr;
+    if (query.category == "recent" || query.category == "reminders") {
+      const auto sql = query.category == "recent"
+        ? "SELECT n.id FROM notes n JOIN recent_access a ON a.note_id=n.id AND a.user_id=n.user_id WHERE n.user_id=? AND n.deleted=0 AND n.archived=0 ORDER BY a.opened_at DESC,n.id ASC LIMIT 5"
+        : "SELECT n.id FROM notes n JOIN reminders r ON r.note_id=n.id AND r.user_id=n.user_id WHERE n.user_id=? AND n.deleted=0 AND n.archived=0";
+      for (const auto &row : db.query(sql, {s.user})) eligible.insert(string(row, "id"));
+      restriction = &eligible;
+    }
+    auto hits = index.search(s.user, query, unlocks(s), restriction);
     auto result = search_results(*this, s, hits);
     json highlight_terms = query.terms;
     for (auto &phrase : query.phrases)
@@ -560,6 +569,10 @@ void App::note_routes() {
       throw Error(400, "Use a name of 1–80 bytes");
     auto filters = b.value("filters", json::object());
     parse_query(query, filters);
+    std::lock_guard lock(mutations);
+    const auto count = db.query("SELECT COUNT(*) AS total FROM saved_searches WHERE user_id=?", {s.user});
+    if (number(count[0], "total") >= 5)
+      throw Error(409, "You can save up to 5 searches. Delete one in Settings first.");
     auto id = random_hex();
     db.query("INSERT INTO saved_searches(id,user_id,name,query,filters) VALUES(?,?,?,?,?)",
              {id, s.user, name, query, filters.dump()});
@@ -568,6 +581,7 @@ void App::note_routes() {
   route("DELETE", "/api/searches/([a-f0-9]+)",
         [&](const httplib::Request &req, httplib::Response &) {
           auto s = auth(req);
+          std::lock_guard lock(mutations);
           db.query("DELETE FROM saved_searches WHERE id=? AND user_id=?", {req.matches[1], s.user});
           return json{{"ok", true}};
         });

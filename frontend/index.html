@@ -11,7 +11,7 @@
     <title>MindKeep · A little space for your thoughts</title>
     <link rel="icon" href="/logo-peach.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
-    <link rel="stylesheet" href="/peach.css?v=14" />
+    <link rel="stylesheet" href="/peach.css?v=24" />
   </head>
   <body>
     <div id="auth-screen" class="auth-screen">
@@ -123,6 +123,7 @@
             id="filter-toggle"
             class="icon-button"
             aria-label="Search filters"
+            aria-expanded="false"
           ></button>
         </form>
         <div class="top-actions">
@@ -181,10 +182,6 @@
             Find your own way to organize.
           </p>
         </div>
-        <div class="sidebar-section" id="saved-section" hidden>
-          <div class="section-label">SAVED SEARCHES</div>
-          <div id="saved-nav"></div>
-        </div>
         <div class="sidebar-bottom">
           <div class="sync-indicator">
             <span class="status-dot"></span
@@ -208,12 +205,19 @@
             >Search in<select id="filter-scope">
               <option value="all">Title and content</option>
               <option value="title">Titles</option>
+              <option value="content">Content only</option>
             </select></label
           >
+          <label class="exclude-filter">Exclude words<input id="filter-exclude" type="text" placeholder="e.g. meeting, draft" maxlength="500" aria-describedby="exclude-hint"><span id="exclude-hint">Whole words in the selected search area. Separate with spaces or commas.</span></label>
+          <button id="save-search" type="button" class="secondary">Save search</button>
           <p>
             Try <code>"weekend ideas" tag:Personal</code>. Ordinary terms match
             together.
           </p>
+          <section class="saved-search-panel" aria-label="Saved searches">
+            <div class="section-label">Saved searches <span id="saved-search-count"></span></div>
+            <div id="saved-filter-list" class="saved-search-buttons"></div>
+          </section>
         </section>
         <div class="page-heading">
           <div>
@@ -459,6 +463,6 @@
       hidden
     />
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-    <script type="module" src="/app.js?v=55"></script>
+    <script type="module" src="/app.js?v=63"></script>
   </body>
 </html>

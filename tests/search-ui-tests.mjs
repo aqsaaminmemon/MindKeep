@@ -12,10 +12,13 @@ for (const [id, value] of Object.entries({
   "filter-folder": "",
   "filter-tag": "",
   "filter-scope": "all",
+  "filter-exclude": "",
 }))
   elements.set(id, { value });
 elements.set("search-error", { hidden: false, textContent: "Old error" });
 elements.set("drawer-shade", { hidden: false });
+elements.set("filters", { hidden: false });
+elements.set("filter-toggle", { setAttribute(name, value) { this[name] = value; } });
 const state = {
   query: "thought",
   highlightTerms: ["thought"],
@@ -78,6 +81,42 @@ assert.ok(renders >= 4);
 console.log(
   "PASS: clear query, stale-response protection, navigation invalidation, and filter-only search",
 );
+
+// Clearing through the real input handler cancels pending filtered results and restores capture.
+elements.get("search").value = "thought";
+elements.get("filter-scope").value = "content";
+elements.get("filter-exclude").value = "meeting";
+const pendingFiltered = context.search();
+state.sort = "relevance";
+const savedSearches = [{ id: "saved", query: "thought", filters: { scope: "content" } }];
+state.searches = savedSearches;
+state.view = "all";
+Object.assign(context, { searchTimer: 0, clearTimeout() {}, setTimeout: () => 1 });
+vm.runInContext(source.slice(source.indexOf('  $("search").oninput ='),
+  source.indexOf('  $("save-search").onclick =')), context);
+elements.get("search").value = "";
+elements.get("search").oninput();
+assert.equal(state.results, null);
+assert.equal(state.query, "");
+assert.equal(state.sort, "updated");
+assert.equal(elements.get("filter-tag").value, "");
+assert.equal(elements.get("filter-exclude").value, "");
+assert.equal(elements.get("filter-scope").value, "all");
+assert.equal(elements.get("filters").hidden, true);
+assert.equal(elements.get("filter-toggle")["aria-expanded"], "false");
+assert.equal(state.searches, savedSearches);
+requests.shift()({ results: [{ id: "late-filtered" }], highlight_terms: ["thought"] });
+await pendingFiltered;
+assert.equal(state.results, null);
+// An empty query in Archive/Trash is a normal category view, not a filter-only search.
+for (const category of ["archive", "trash"]) {
+  state.view = category;
+  await context.search();
+  assert.equal(state.view, category);
+  assert.equal(state.results, null);
+}
+state.view = "all";
+console.log("PASS: clearing the search input resets filters and relevance, preserves saved searches and category, rejects late responses");
 
 // Exercise the same favorite rendering used by cards and the open editor.
 state.pending = {};
@@ -183,15 +222,16 @@ for (const id of [
   "tag-nav",
   "folder-hint",
   "tag-hint",
-  "saved-section",
-  "saved-nav",
+  "saved-search-count",
+  "save-search",
+  "saved-filter-list",
   "view-title",
   "view-description",
   "sort",
   "collection",
   "collection-footer",
 ])
-  elements.set(id, { setAttribute() {} });
+  elements.set(id, { setAttribute() {}, classList: { toggle() {} } });
 Object.assign(state, {
   locked: false,
   notes: new Map(),
@@ -258,6 +298,27 @@ state.results = null;
 context.render();
 assert.equal(elements.get("note-composer").hidden, false);
 console.log("PASS: composer and empty-state creation appear only in All Notes");
+
+// Saved names are shown directly beside the search options, including an empty state.
+state.searches = [{ id: "saved-1", name: "Work search", query: "project", filters: { scope: "content" } }];
+state.view = "all"; state.results = null; state.query = "";
+context.render();
+assert.ok(elements.get("saved-filter-list").innerHTML.includes('data-saved-search="saved-1"'));
+assert.ok(elements.get("saved-filter-list").innerHTML.includes('Run saved search Work search'));
+context.clearSearch();
+assert.equal(elements.get("note-composer").hidden, false);
+assert.ok(elements.get("saved-filter-list").innerHTML.includes('Work search'));
+state.searches = Array.from({ length: 5 }, (_, i) => ({ id: `cap-${i}`, name: `Saved ${i}` }));
+context.render();
+assert.equal(elements.get("save-search").disabled, true);
+assert.equal(elements.get("saved-search-count").textContent, "5/5");
+state.searches.pop();context.render();
+assert.equal(elements.get("save-search").disabled, false);
+assert.equal(elements.get("saved-search-count").textContent, "4/5");
+state.searches = [];
+context.render();
+assert.match(elements.get("saved-filter-list").innerHTML, /No saved searches yet/);
+console.log("PASS: saved-search list is visible in the panel, clearing restores Create note and keeps saved searches");
 
 // Optional synthetic markup fixture uses the production card and stylesheet for visual QA.
 if (process.env.MINDKEEP_UI_FIXTURE) {
